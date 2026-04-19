@@ -6,8 +6,7 @@ from openai import OpenAI
 parser = argparse.ArgumentParser(description="OpenAI CLI tool")
 parser.add_argument("--model", type=str, required=True, help="Model name (e.g., gpt-4o-mini)")
 parser.add_argument("--user_content", type=str, required=True, help="User message content")
-parser.add_argument("--system_content", type=str, help="System message content")
-parser.add_argument("--max_completion_tokens", type=int, default=100, help="Maximum number of tokens in the response")
+parser.add_argument("--max_completion_tokens", type=int, default=400, help="Maximum number of tokens in the response")
 parser.add_argument("--temperature", type=float, default=0.7, help="Sampling temperature")
 parser.add_argument("--cost", action="store_true", help="Enable cost estimation")
 args = parser.parse_args()
@@ -20,14 +19,23 @@ else:
     client = OpenAI(api_key=api_key) 
 
 # 3. Create request message
+
+system_content = "You are a helpful assistant that creates study plans for Language learners." \
+                    "Generate the plan with the following order: Week 1: Title 1 | Week 2: Title 2 | Week 3: Title 3 | etc." \
+                    "If requested skills are non related to language learning, return the message:" \
+                    "'Apologies, we are no longer supporting other skills.'"
+
 response = client.chat.completions.create(
     model=args.model,
     max_completion_tokens=args.max_completion_tokens,
     temperature=args.temperature,
     
-    # Please note that the guardrails should be added to the system_content to impose restrictions on the users' misused of the model.
     messages=[
-        {"role": "system", "content": args.system_content} if args.system_content else None,
+        # The system role is used to set the behavior of the assistant, including instructions, guardrailes (to impose restrictions), or any information that improve the assistant's response quality and relevance.
+        {"role": "system", "content": system_content},
+        # Location to define a user-assistant pair to serve as an ideal example/response.
+        {"role": "user", "content": "I want to learn to speak Persian. Create a study plan for me."},
+        {"role": "assistant", "content": "I will create a study plan for you to speak Persian:\n"},
         {"role": "user", "content": args.user_content}]
     )
 
@@ -48,7 +56,5 @@ if args.cost:
     cost = (input_tokens * input_token_price + output_tokens * output_token_price)
     print(f"\nEstimated cost: ${cost}")
 
-"""python3 main.py --cost --max_completion_tokens 400 --temperature 0.7 --model gpt-4o-mini
- --user_content "I want to learn to speak Dutch. Create a study plan for me."
- --system_content "You are a helpful assistant that creates study plans for Language learners. If these skills are non related to languages, return the message:'Apologies, we are no longer supporting other skills.'"
+"""python3 main.py --cost --max_completion_tokens 400 --temperature 0.7 --model gpt-4o-mini --user_content "I want to learn to speak Dutch. Create a study plan for me."
 """
