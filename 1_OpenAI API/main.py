@@ -48,7 +48,7 @@ if args.cost:
     cost = (input_tokens * input_token_price + output_tokens * output_token_price)
     print(f"\nEstimated cost: ${cost}")
 
-"""python3 main.py --cost --max_completion_tokens 100 --temperature 0.7 --model gpt-4o-mini
+"""python3 main.py --cost --max_completion_tokens 400 --temperature 0.7 --model gpt-4o-mini
  --user_content "I want to learn to speak Dutch. Create a study plan for me."
- --system_content "You are a helpful assistant that creates study plans for learning Languages. If these skills are non related to languages, return the message:'Apologies, we are no longer supporting other skills.'"
+ --system_content "You are a helpful assistant that creates study plans for Language learners. If these skills are non related to languages, return the message:'Apologies, we are no longer supporting other skills.'"
 """
