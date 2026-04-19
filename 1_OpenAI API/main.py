@@ -8,6 +8,7 @@ parser.add_argument("--model", type=str, required=True, help="Model name (e.g., 
 parser.add_argument("--role", type=str, required=True, help="Role (user/system/assistant)")
 parser.add_argument("--content", type=str, required=True, help="Message content")
 parser.add_argument("--max_completion_tokens", type=int, default=100, help="Maximum number of tokens in the response")
+parser.add_argument("--temperature", type=float, default=0.7, help="Sampling temperature")
 parser.add_argument("--cost", action="store_true", help="Enable cost estimation")
 args = parser.parse_args()
 
@@ -20,7 +21,8 @@ client = OpenAI(api_key=api_key)
 response = client.chat.completions.create(
     model=args.model,
     messages=[{"role": args.role, "content": args.content}],
-    max_completion_tokens=args.max_completion_tokens)
+    max_completion_tokens=args.max_completion_tokens,
+    temperature=args.temperature)
 
 # 4. Print response
 print(response.choices[0].message.content)
@@ -39,4 +41,4 @@ if args.cost:
     cost = (input_tokens * input_token_price + output_tokens * output_token_price)
     print(f"\nEstimated cost: ${cost}")
 
-# python3 main.py --cost --max_completion_tokens 100 --model gpt-4o-mini --role user --content "Write a haiku about the ocean."
+# python3 main.py --cost --max_completion_tokens 100 --temperature 0.7 --model gpt-4o-mini --role user --content "Write a short paragraph about the benefits of using OpenAI's API."
