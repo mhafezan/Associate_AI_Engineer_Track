@@ -19,14 +19,15 @@ if not api_key:
 else:
     client = OpenAI(api_key=api_key) 
 
-# 3. Create request dynamically
+# 3. Create request message
 response = client.chat.completions.create(
     model=args.model,
+    max_completion_tokens=args.max_completion_tokens,
+    temperature=args.temperature,
     messages=[
         {"role": "system", "content": args.system_content} if args.system_content else None,
-        {"role": "user", "content": args.user_content}],
-    max_completion_tokens=args.max_completion_tokens,
-    temperature=args.temperature)
+        {"role": "user", "content": args.user_content}]
+    )
 
 # 4. Print response
 print(response.choices[0].message.content)
