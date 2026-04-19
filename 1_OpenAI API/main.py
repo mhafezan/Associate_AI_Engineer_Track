@@ -24,6 +24,8 @@ response = client.chat.completions.create(
     model=args.model,
     max_completion_tokens=args.max_completion_tokens,
     temperature=args.temperature,
+    
+    # Please note that the guardrails should be added to the system_content to impose restrictions on the users' misused of the model.
     messages=[
         {"role": "system", "content": args.system_content} if args.system_content else None,
         {"role": "user", "content": args.user_content}]
@@ -48,5 +50,5 @@ if args.cost:
 
 """python3 main.py --cost --max_completion_tokens 100 --temperature 0.7 --model gpt-4o-mini
  --user_content "I want to learn to speak Dutch. Create a study plan for me."
- --system_content "You are a helpful assistant that creates study plans for learning Dutch."
- """
+ --system_content "You are a helpful assistant that creates study plans for learning Languages. If these skills are non related to languages, return the message:'Apologies, we are no longer supporting other skills.'"
+"""
