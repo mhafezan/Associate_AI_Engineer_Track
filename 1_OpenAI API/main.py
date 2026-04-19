@@ -12,10 +12,12 @@ parser.add_argument("--temperature", type=float, default=0.7, help="Sampling tem
 parser.add_argument("--cost", action="store_true", help="Enable cost estimation")
 args = parser.parse_args()
 
-# 2. Load API key securely (environment variable) using setx OPENAI_API_KEY "sk-xxxxxxxxxxxxxxxx"
+# 2. Load API key securely (environment variable) using setx OPENAI_API_KEY "sk-xxxxxxxxxxxxxxxx" in your environment variables
 api_key = os.getenv("OPENAI_API_KEY")
-if not api_key: raise ValueError("OPENAI_API_KEY environment variable not set")
-client = OpenAI(api_key=api_key) 
+if not api_key:
+    raise ValueError("OPENAI_API_KEY environment variable not set")
+else:
+    client = OpenAI(api_key=api_key) 
 
 # 3. Create request dynamically
 response = client.chat.completions.create(
