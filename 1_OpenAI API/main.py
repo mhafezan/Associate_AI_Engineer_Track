@@ -5,8 +5,8 @@ from openai import OpenAI
 # 1. Parse command-line arguments
 parser = argparse.ArgumentParser(description="OpenAI CLI tool")
 parser.add_argument("--model", type=str, required=True, help="Model name (e.g., gpt-4o-mini)")
-parser.add_argument("--role", type=str, required=True, help="Role (user/system/assistant)")
-parser.add_argument("--content", type=str, required=True, help="Message content")
+parser.add_argument("--user_content", type=str, required=True, help="User message content")
+parser.add_argument("--system_content", type=str, help="System message content")
 parser.add_argument("--max_completion_tokens", type=int, default=100, help="Maximum number of tokens in the response")
 parser.add_argument("--temperature", type=float, default=0.7, help="Sampling temperature")
 parser.add_argument("--cost", action="store_true", help="Enable cost estimation")
@@ -22,7 +22,9 @@ else:
 # 3. Create request dynamically
 response = client.chat.completions.create(
     model=args.model,
-    messages=[{"role": args.role, "content": args.content}],
+    messages=[
+        {"role": "system", "content": args.system_content} if args.system_content else None,
+        {"role": "user", "content": args.user_content}],
     max_completion_tokens=args.max_completion_tokens,
     temperature=args.temperature)
 
@@ -43,4 +45,7 @@ if args.cost:
     cost = (input_tokens * input_token_price + output_tokens * output_token_price)
     print(f"\nEstimated cost: ${cost}")
 
-# python3 main.py --cost --max_completion_tokens 100 --temperature 0.7 --model gpt-4o-mini --role user --content "Write a short paragraph about the benefits of using OpenAI's API."
+"""python3 main.py --cost --max_completion_tokens 100 --temperature 0.7 --model gpt-4o-mini
+ --user_content "I want to learn to speak Dutch. Create a study plan for me."
+ --system_content "You are a helpful assistant that creates study plans for learning Dutch."
+ """
