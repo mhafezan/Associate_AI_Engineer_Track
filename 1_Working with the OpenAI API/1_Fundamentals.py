@@ -21,7 +21,6 @@ else:
 # 3. Create request message
 
 system_content = "You are a helpful assistant that creates study plans for Language learners." \
-                    "Generate the plan with the following order: Week 1: Title 1 | Week 2: Title 2 | Week 3: Title 3 | etc." \
                     "If requested skills are non related to language learning, return the message:" \
                     "'Apologies, we are no longer supporting other skills.'"
 

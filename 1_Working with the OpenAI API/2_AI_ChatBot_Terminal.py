@@ -28,7 +28,8 @@ while True:
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         max_completion_tokens=100,
-        messages=messages
+        messages=messages,
+        stream=True # Enable streaming responses, i.e., the response appears token by token, like a real conversation
     )
 
     # Extract assistant response
