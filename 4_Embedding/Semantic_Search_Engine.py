@@ -1,8 +1,5 @@
-"""Search Shopify products using OpenAI embeddings, without RAG.
-
-Install with your chosen interpreter: python -m pip install numpy openai tiktoken
-Set OPENAI_API_KEY, then run this file. Use --limit to change the catalogue size.
-Dataset: https://huggingface.co/datasets/Shopify/product-catalogue (Apache-2.0)
+""" Search Shopify products using OpenAI embeddings without a vector database.
+    Dataset: https://huggingface.co/datasets/Shopify/product-catalogue (Apache-2.0)
 """
 
 import argparse
@@ -19,11 +16,9 @@ import numpy as np
 from openai import OpenAI, OpenAIError
 import tiktoken
 
-
 MODEL = "text-embedding-3-small"
 CACHE_DIR = Path(__file__).resolve().parent / ".semantic_search_cache"
 client = None
-
 
 def load_products(limit=1000):
     """Download product dictionaries in pages, reusing a local JSON cache."""
@@ -78,7 +73,6 @@ def load_products(limit=1000):
     cache_file.write_text(json.dumps(products, ensure_ascii=False), encoding="utf-8")
     return products
 
-
 def create_product_text(product):
     """Combine the product fields into one searchable string."""
     return (
@@ -87,7 +81,6 @@ def create_product_text(product):
         f"Category: {product['category']}\n"
         f"Features: {'; '.join(product['features'])}"
     )
-
 
 def create_embeddings(texts):
     """Embed a string or list of strings in bounded batches, preserving order."""
@@ -118,9 +111,12 @@ def create_embeddings(texts):
                 break
             token_count += len(inputs[end])
             end += 1
+
         response = client.embeddings.create(
-            model=MODEL, input=inputs[start:end], encoding_format="float",
-        )
+            model=MODEL,
+            input=inputs[start:end],
+            encoding_format="float")
+
         data = sorted(response.data, key=lambda item: item.index)
         if [item.index for item in data] != list(range(end - start)):
             raise ValueError("The API returned incomplete or misindexed embeddings.")
@@ -129,7 +125,6 @@ def create_embeddings(texts):
         if len(inputs) > 1:
             print(f"Embedded {start:,}/{len(inputs):,} products...", flush=True)
     return embeddings
-
 
 def find_n_closest(query_vector, embeddings, n=5):
     """Return product indices and cosine distances in ascending order."""
@@ -150,18 +145,21 @@ def find_n_closest(query_vector, embeddings, n=5):
     return [{"distance": float(distances[index]), "index": int(index)}
             for index in distances_sorted]
 
-
 def main():
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--limit", type=int, default=1000, help="Products to load (default: 1000)")
     args = parser.parse_args()
+
     if args.limit < 5:
         parser.error("--limit must be at least 5")
+
     if not os.environ.get("OPENAI_API_KEY", "").strip():
         raise ValueError("Set the OPENAI_API_KEY environment variable before running.")
 
     products = load_products(args.limit)
     product_texts = [create_product_text(product) for product in products]
+    
     # Invalidate vectors whenever the model, text, or product order changes.
     fingerprint = hashlib.sha256(
         json.dumps([MODEL, product_texts], ensure_ascii=False).encode("utf-8")
