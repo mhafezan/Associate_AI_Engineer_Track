@@ -10,6 +10,7 @@ A comprehensive collection of hands-on projects demonstrating practical applicat
 - [Module 1: OpenAI Chat Completions API](#module-1-openai-chat-completions-api)
 - [Module 2: HuggingFace Transformers](#module-2-huggingface-transformers)
 - [Module 3: OpenAI Responses API](#module-3-openai-responses-api)
+- [Module 4: Embeddings and Semantic Search](#module-4-embeddings-and-semantic-search)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Environment Setup](#environment-setup)
@@ -46,6 +47,9 @@ Associate_AI_Engineer_Career_Track/
 │   └── 4_Task_DocumentQA_Model_Bert.py
 ├── 3_OpenAI_Responses_API/
 │   └── agentic_chatbot_terminal.py
+├── 4_Embedding/
+│   ├── Semantic_Search_Engine.py
+│   └── .gitignore
 ├── README.md
 └── LICENSE
 ```
@@ -63,8 +67,8 @@ Associate_AI_Engineer_Career_Track/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/mhafezan/Associate_AI_Engineer_Career_Track.git
-   cd Associate_AI_Engineer_Career_Track
+   git clone https://github.com/mhafezan/Associate_AI_Engineer.git
+   cd Associate_AI_Engineer
    ```
 
 2. **Install dependencies** (see [Installation](#installation) section)
@@ -390,6 +394,49 @@ Assistant: Here are several current options for Toronto this weekend...
 
 ---
 
+## Module 4: Embeddings and Semantic Search
+
+[`4_Embedding/Semantic_Search_Engine.py`](4_Embedding/Semantic_Search_Engine.py) implements an interactive product search engine using embeddings and cosine distance. It retrieves products without RAG or generated answers.
+
+### Data and workflow
+
+1. `load_products` downloads the first 1,000 usable products by default from the training split of the [Shopify product catalogue](https://huggingface.co/datasets/Shopify/product-catalogue). It maps titles, descriptions, categories, and brands into `products` dictionaries. Descriptions are capped at 2,000 characters; brands are stored in `features`.
+2. `create_product_text` combines those fields into `product_texts`.
+3. `create_embeddings` creates `product_embeddings` with `text-embedding-3-small`. Requests are limited to 64 inputs and 24,000 tokens; individual inputs over 8,191 tokens are rejected.
+4. Each user-entered `query_text` is embedded into `query_vector`.
+5. `find_n_closest` returns the five nearest products as `hits`, preserving their `index` and cosine `distance`. Results display titles, categories, descriptions, brands, and distances.
+6. The loop accepts another query until `exit` is entered, ignoring case and surrounding whitespace. Blank queries are skipped; Ctrl+C and EOF also exit.
+
+### Setup and run on Windows
+
+Run these commands from the **repository root** using a standard Windows Python installation with `venv` support:
+
+```powershell
+python -m venv .\4_Embedding\.venv
+.\4_Embedding\.venv\Scripts\python.exe -m pip install numpy openai tiktoken
+$env:OPENAI_API_KEY = "your-api-key"
+.\4_Embedding\.venv\Scripts\python.exe .\4_Embedding\Semantic_Search_Engine.py
+```
+
+If the virtual environment already exists, skip its creation. No `requirements.txt` is needed. Use the same virtual-environment interpreter for installation and execution: plain `python` or `python3` may resolve to another installation and cause `ModuleNotFoundError` for `numpy` or `tiktoken`.
+
+From **inside `4_Embedding`**, run:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install numpy openai tiktoken
+.\.venv\Scripts\python.exe .\Semantic_Search_Engine.py
+```
+
+To index more products, add `--limit 5000` (minimum: 5). Example queries include `a gift for someone who enjoys gardening` and `a lightweight summer hat`.
+
+### Caching and limitations
+
+Product metadata and embeddings are saved in `4_Embedding/.semantic_search_cache/`, which is excluded from Git along with `.venv/` and `__pycache__/`. Embedding cache keys include the model and ordered product texts. Cached vectors are reused on later runs; each nonempty search still calls the OpenAI embeddings API. Initial indexing and query embedding incur API charges.
+
+Search covers only the loaded catalogue sample, which is multilingual and is not live inventory. Lower cosine distance indicates greater similarity, not a confidence probability. The engine returns five results even when all matches are weak. To refresh downloaded metadata, remove the relevant `shopify_train_<limit>_v1.json` cache file; embeddings are rebuilt if the resulting texts change.
+
+---
+
 ## 📦 Requirements
 
 ### Core Dependencies
@@ -401,6 +448,8 @@ Assistant: Here are several current options for Toronto this weekend...
 | `transformers` | Latest | HuggingFace transformer models |
 | `torch` | Latest | Deep learning framework |
 | `pypdf` | Latest | PDF processing |
+| `numpy` | Latest | Embedding arrays and cosine-distance ranking |
+| `tiktoken` | Latest | Embedding input token counting |
 
 ### Optional Dependencies
 
@@ -414,8 +463,8 @@ Assistant: Here are several current options for Toronto this weekend...
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/mhafezan/Associate_AI_Engineer_Career_Track.git
-cd Associate_AI_Engineer_Career_Track
+git clone https://github.com/mhafezan/Associate_AI_Engineer.git
+cd Associate_AI_Engineer
 ```
 
 ### 2. Create Virtual Environment (Recommended)
@@ -434,7 +483,7 @@ source venv/bin/activate
 
 ```bash
 # Install all requirements
-pip install openai flask transformers torch pypdf
+python -m pip install openai flask transformers torch pypdf numpy tiktoken
 
 # Or install individual modules as needed
 # For OpenAI module
@@ -630,6 +679,7 @@ By completing this project, you will understand:
 - ✅ Sentiment analysis
 - ✅ Question-answering systems
 - ✅ Document processing
+- ✅ Product semantic search using embeddings and cosine distance
 
 ### ML Engineering
 - ✅ Model selection and loading
@@ -760,6 +810,6 @@ For questions, issues, or feedback:
 
 ---
 
-**Last Updated**: August 2026
+**Last Updated**: September 2026
 **Python Version**: 3.8+  
 **Status**: Active Development
